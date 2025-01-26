@@ -2,13 +2,17 @@ import PropTypes from 'prop-types';
 
 import TasksFilter from './TasksFilter';
 
-const Footer = ({ activeFilter, onFilterChange, tasksLeft }) => (
-  <footer className="footer">
-    <span className="todo-count">{tasksLeft} items left</span>
-    <TasksFilter activeFilter={activeFilter} onFilterChange={onFilterChange} />
-    <button className="clear-completed">Clear completed</button>
-  </footer>
-);
+function Footer({ activeFilter, onFilterChange, tasksLeft, clearCompleted }) {
+  return (
+    <footer className="footer">
+      <span className="todo-count">{tasksLeft} items left</span>
+      <TasksFilter activeFilter={activeFilter} onFilterChange={onFilterChange} />
+      <button type="button" className="clear-completed" onClick={clearCompleted}>
+        Clear completed
+      </button>
+    </footer>
+  );
+}
 
 Footer.propTypes = {
   activeFilter: PropTypes.string.isRequired,
@@ -16,8 +20,6 @@ Footer.propTypes = {
   tasksLeft: PropTypes.number.isRequired,
 };
 
-Footer.defaultProps = {
-  tasksLeft: 0,
-};
+Footer.defaultProps = {};
 
 export default Footer;
