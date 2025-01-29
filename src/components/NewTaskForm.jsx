@@ -24,13 +24,19 @@ function NewTaskForm({ onAddTask }) {
         className="new-todo-form__timer"
         placeholder="Min"
         value={minutes}
-        onChange={(e) => setMinutes(e.target.value)}
+        onChange={(e) => setMinutes(e.target.value.replace(/\D/, ''))}
+        type="number"
+        min="0"
+        max="9999"
       />
       <input
         className="new-todo-form__timer"
         placeholder="Sec"
         value={seconds}
-        onChange={(e) => setSeconds(e.target.value)}
+        onChange={(e) => setSeconds(e.target.value.replace(/\D/, ''))}
+        type="number"
+        min="0"
+        max="59"
       />
       <button type="submit" style={{ display: 'none' }}>
         Add

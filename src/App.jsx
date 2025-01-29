@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import TaskList from './components/TaskList';
 import NewTaskForm from './components/NewTaskForm';
@@ -15,9 +15,26 @@ function App() {
       completed: false,
       created: new Date().toLocaleString(),
       time,
+      timeLeft: time,
+      isRunning: false,
     };
     setTasks([...tasks, newTask]);
   };
+
+  const toggleTimer = (id) => {
+    setTasks((prevTasks) => prevTasks.map((task) => (task.id === id ? { ...task, isRunning: !task.isRunning } : task)));
+  };
+
+  const updateTimers = () => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.isRunning && task.timeLeft > 0 ? { ...task, timeLeft: task.timeLeft - 1 } : task))
+    );
+  };
+
+  useEffect(() => {
+    const timer = setInterval(updateTimers, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const toggleTask = (id) => {
     setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)));
@@ -50,7 +67,13 @@ function App() {
         <NewTaskForm onAddTask={addTask} />
       </header>
       <section className="main">
-        <TaskList tasks={filteredTasks} onToggle={toggleTask} onDelete={deleteTask} onEdit={editTask} />
+        <TaskList
+          tasks={filteredTasks}
+          onToggle={toggleTask}
+          onDelete={deleteTask}
+          onEdit={editTask}
+          onToggleTimer={toggleTimer}
+        />
       </section>
       <Footer activeFilter={filter} onFilterChange={setFilter} tasksLeft={tasksLeft} clearCompleted={clearCompleted} />
     </section>

@@ -1,11 +1,10 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-function Task({ task, onToggle, onDelete, onEdit }) {
-  const [timeLeft, setTimeLeft] = useState(task.time || 0);
-  const [isRunning, setIsRunning] = useState(false);
+function Task({ task, onToggle, onDelete, onEdit, onToggleTimer }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
+  const inputRef = useRef(null);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -14,14 +13,14 @@ function Task({ task, onToggle, onDelete, onEdit }) {
   };
 
   useEffect(() => {
-    let timer;
-    if (isRunning) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
+    setEditedTitle(task.title);
+  }, [task.title]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
     }
-    return () => clearInterval(timer);
-  }, [isRunning]);
+  }, [isEditing]);
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
@@ -31,16 +30,22 @@ function Task({ task, onToggle, onDelete, onEdit }) {
     }
   };
 
+  const handleCancelEdit = () => {
+    setEditedTitle(task.title);
+    setIsEditing(false);
+  };
+
   return (
     <li className={`${task.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`}>
       {isEditing ? (
         <form onSubmit={handleEditSubmit}>
           <input
-            id="taskInput"
+            ref={inputRef}
             className="edit"
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleEditSubmit}
+            onBlur={handleCancelEdit} // Выход по клику вне поля
+            onKeyDown={(e) => e.key === 'Escape' && handleCancelEdit()}
           />
         </form>
       ) : (
@@ -49,12 +54,12 @@ function Task({ task, onToggle, onDelete, onEdit }) {
           <label htmlFor="taskInput">
             <span className="title">{task.title}</span>
             <span className="description">
-              {formatTime(timeLeft)}
+              {formatTime(task.timeLeft)}
               <button
                 type="button"
                 aria-label="pause-play"
-                className={`icon ${isRunning ? 'icon-pause' : 'icon-play'}`}
-                onClick={() => setIsRunning(!isRunning)}
+                className={`icon ${task.isRunning ? 'icon-pause' : 'icon-play'}`}
+                onClick={() => onToggleTimer(task.id)}
               />
             </span>
             <span className="created">{task.created}</span>
@@ -82,10 +87,13 @@ Task.propTypes = {
     completed: PropTypes.bool.isRequired,
     created: PropTypes.string.isRequired,
     time: PropTypes.number.isRequired,
+    timeLeft: PropTypes.number.isRequired,
+    isRunning: PropTypes.bool.isRequired,
   }).isRequired,
   onToggle: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
+  onToggleTimer: PropTypes.func.isRequired,
 };
 
 export default Task;
